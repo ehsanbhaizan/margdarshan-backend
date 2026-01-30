@@ -4,12 +4,23 @@ const cors = require("cors");
 const connectDB = require("./config/db.js");
 
 dotenv.config();
-connectDB();
 
 const app = express();
 
 app.use(express.json());
 app.use(cors());
+
+// 🔥 SERVERLESS-SAFE DB CONNECT
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    return res.status(500).json({
+      message: "Database connection failed",
+    });
+  }
+});
 
 app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/auth", require("./routes/authRoutes"));
@@ -21,4 +32,5 @@ app.get("/", (req, res) => {
 });
 
 module.exports = app;
+
 
